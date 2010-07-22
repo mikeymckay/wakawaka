@@ -1,7 +1,9 @@
-require 'sinatra/base'
+require 'rubygems'
+require 'sinatra'
+#require 'sinatra/base'
 
 class SpecServer < Sinatra::Base
   get '/' do
-    'Hello SpecServer!'
+    erb :home
   end
 end
