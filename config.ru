@@ -1,4 +1,4 @@
 require 'rubygems'
-require File.join(File.dirname(__FILE__), 'lib/spec_server.rb')
+require File.join(File.dirname(__FILE__), 'lib/wakawaka.rb')
 
-run SpecServer
+run Wakawaka
