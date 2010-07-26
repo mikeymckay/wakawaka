@@ -13,7 +13,6 @@ Wakawaka.set(:environment, :test)
 World do
   Capybara.app = Wakawaka
   Capybara.javascript_driver = :envjs
-#  Capybara.app_host = "http://localhost:4567"
   include Capybara
   include Spec::Expectations
   include Spec::Matchers

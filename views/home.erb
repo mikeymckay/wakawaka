@@ -1,3 +1,25 @@
-<script src="/javascripts/jquery.min.js" type="text/javascript"></script>
-<script src="/javascripts/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
-Hello SpecServer!
+<html>
+<head>
+  <script src="/javascripts/jquery.min.js" type="text/javascript"></script>
+  <script src="/javascripts/jquery-ui.min.js" type="text/javascript" charset="utf-8"></script>
+</head>
+<body>
+  <h1>Welcome to Wakawaka<h1>
+  <h2>Available Projects <small>(using <%= data_dir %> )</small></h2>
+  <ul id='project_list'></ul>
+  <script>
+    $('#project_list').load("/projects")
+  </script>
+  <button id='new_project_button'>New Project</button>
+  <form target='' id='new_project_form' style='display:none' action="/new_project" method="post" onsubmit="">
+    <label for='project_name'>Project Name</label><input type='text' name='project_name' id='project_name'></input>
+    <label for='git_url'>GitURL</label><input type='text' name='git_url' id='git_url'></input>
+    <input type='submit' value='Save'>
+  </form>
+  <script>
+    $('#new_project_button').click( function() {
+      $('#new_project_form').show();
+    });
+  </script>
+</body>
+</html>

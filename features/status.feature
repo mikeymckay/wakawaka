@@ -5,7 +5,6 @@ Feature: Viewing a project status page
 
   Scenario: Valid project
   Scenario: Invalid project
-  Scenario: New Project
   Scenario: Complete Project
   Scenario: Partially Completed Project
   Scenario: Project with invalid specifications
