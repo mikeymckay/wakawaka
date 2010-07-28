@@ -5,21 +5,44 @@
 </head>
 <body>
   <h1>Welcome to Wakawaka<h1>
-  <h2>Available Projects <small>(using <%= data_dir %> )</small></h2>
+  <h2>Available Projects <small>(using <%= File.basename(data_dir) %> )</small></h2>
   <ul id='project_list'></ul>
   <script>
     $('#project_list').load("/projects")
   </script>
   <button id='new_project_button'>New Project</button>
-  <form target='' id='new_project_form' style='display:none' action="/new_project" method="post" onsubmit="">
-    <label for='project_name'>Project Name</label><input type='text' name='project_name' id='project_name'></input>
-    <label for='git_url'>GitURL</label><input type='text' name='git_url' id='git_url'></input>
+  <form target='' id='new_project_form' style='display:none' action="/new_project" method="post">
+    <label for='name'>Project Name</label><input type='text' name='name' id='name'></input>
+    <label for='git_uri'>GitURI</label><input type='text' name='git_uri' id='git_uri'></input>
     <input type='submit' value='Save'>
   </form>
   <script>
+    // Show the form
     $('#new_project_button').click( function() {
       $('#new_project_form').show();
     });
+    // Submit the form via ajax
+    $('#new_project_form').submit( function() {
+      $.post($("#new_project_form").attr('action'), $("#new_project_form").serialize(), function() {
+        // Reload the project list after the form was submitted
+        $('#project_list').load("/projects");
+        window.setTimeout(function() {
+          reload_project_list();
+        }, 3000);
+      });
+      return false;
+    });
+
+    function reload_project_list() {
+      $('#project_list').load("/projects");
+      if ($('#project_list').html().match(/Loading/)){
+        // Check every second
+        window.setTimeout(function() {
+          reload_project_list();
+        }, 1000);
+      }
+    }
+
   </script>
 </body>
 </html>

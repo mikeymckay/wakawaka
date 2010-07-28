@@ -12,8 +12,37 @@ Wakawaka.set(:environment, :test)
 
 World do
   Capybara.app = Wakawaka
-  Capybara.javascript_driver = :envjs
+  Capybara.default_driver = :envjs
+#  Capybara.javascript_driver = :envjs
   include Capybara
   include Spec::Expectations
   include Spec::Matchers
+end
+
+ROOT = File.expand_path(File.dirname(__FILE__) + "/../../") + "/"
+
+# Helper method for running shell commands
+def run(command, verbose = false, message = nil)
+  if verbose then
+    puts "#{message}"
+    puts command
+    result = `#{command}`
+    puts result
+    return result
+  else
+    `#{command}`
+  end
+end
+
+
+# This can be called within features using @reset_test_data
+def reset_test_data
+  # Copy a fresh set of test data from the fixture
+  run "rm -rf #{ROOT}test_data/*"
+  run "cp -a #{ROOT}test_data_fixture/* #{ROOT}test_data", true, "Resetting test data"
+end
+
+reset_test_data
+
+at_exit do
 end
