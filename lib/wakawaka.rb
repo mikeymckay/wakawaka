@@ -89,17 +89,14 @@ class Wakawaka < Sinatra::Base
   def cucumber(id)
     processing_message = "Processing cucumber specifications"
     append_property_to_project(id,{processing_message => Time.now})
-    return
     fork do
       cucumber_results = `cd #{data_dir}#{id};cucumber`
       puts cucumber_results
-      projects_updated = projects
       puts cucumber_results.match(/^d+ scenario.*/).inspect
-      projects_updated[id][:scenarios] = cucumber_results.match(/^d+ scenario.*/)[0]
-      projects_updated[id][:steps] = cucumber_results.match(/^d+ step.*/)[0]
-      File.open(data_dir + "projects.yml","w+") do |file|
-        file.puts projects_updated.to_yaml
-      end
+      append_property_to_project(id, {
+        :scenarios => cucumber_results.match(/^d+ scenario.*/)[0],
+        :steps => cucumber_results.match(/^d+ step.*/)[0]
+      })
       remove_property_from_project(id,processing_message)
     end
   end
