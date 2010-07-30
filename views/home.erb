@@ -35,7 +35,7 @@
 
     function reload_project_list() {
       $('#project_list').load("/projects");
-      if ($('#project_list').html().match(/Loading/)){
+      if ($('#project_list').html().match(/Processing/)){
         // Check every second
         window.setTimeout(function() {
           reload_project_list();

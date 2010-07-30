@@ -25,8 +25,8 @@ Feature: Viewing a project status page
   Scenario: Complete Project
     Given I am on "the home page"
     When I follow "capybara-demo"
-    Then I should see "100% of scenarios passing"
-    
+    Then I should see "1 scenario (1 passed)"
+    And I should see "6 steps (6 passed)"
 
   Scenario: Partially Completed Project
   Scenario: Project with invalid specifications

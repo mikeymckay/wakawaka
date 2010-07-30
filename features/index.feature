@@ -16,6 +16,6 @@ Feature: Index page
     And I press "Save"
     Then I should see "another-capybara-demo"
     And I should see "git://github.com/mikeymckay/sinatra-cucumber-capybara-envjs.git"
-    And I should see "Loading git data..."
+    And I should see "Processing git clone"
     And I wait 1 second
     And I should see "Mike McKay"

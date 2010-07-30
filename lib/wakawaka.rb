@@ -25,24 +25,97 @@ class Wakawaka < Sinatra::Base
     YAML.load_file(data_dir + "projects.yml") rescue nil || {}
   end
 
+  def create_project(id,hash)
+    projects_updated = projects
+    projects_updated[id] = hash
+    File.open(data_dir + "projects.yml","w+") do |file|
+      file.puts projects_updated.to_yaml
+    end
+  end
+
+  def append_property_to_project(id,hash)
+    projects_updated = projects
+    projects_updated[id].merge!(hash)
+    File.open(data_dir + "projects.yml","w+") do |file|
+      file.puts projects_updated.to_yaml
+    end
+  end
+
+  def remove_property_from_project(id,property)
+    projects_updated = projects
+    projects_updated[id].delete(property)
+    File.open(data_dir + "projects.yml","w+") do |file|
+      file.puts projects_updated.to_yaml
+    end
+  end
+
+  def clone(name,git_uri)
+    processing_message = "Processing git clone"
+    id = name.gsub(/[^a-zA-Z]/,"") + "-" + UUID.generate
+    create_project(id, {:git_uri => git_uri, :name => name, processing_message => true})
+    fork do
+      begin
+        Git.clone(git_uri, data_dir + id)
+      rescue Exception => e
+        append_property_to_project(id, :error => e)
+      end
+      last_commit(id)
+      remove_property_from_project(id,processing_message)
+    end
+    return id
+  end
+
+  def pull(id)
+    processing_message = "Processing git pull"
+    append_property_to_project(id,{processing_message => Time.now})
+    fork do
+      projects_updated = projects
+      Git.open(data_dir+id).pull
+      last_commit(id)
+      remove_property_from_project(id,processing_message)
+    end
+  end
+
+  def last_commit(id)
+    last_commit = Git.open(data_dir+id).log.first
+    #last_commit = Git.open(data_dir+id).log.first rescue nil || false
+    append_property_to_project(id, {
+      :last_commit_author => last_commit.author.name,
+      :last_commit_message => last_commit.message,
+      :last_commit_date => last_commit.date
+    })
+  end
+
+  def cucumber(id)
+    processing_message = "Processing cucumber specifications"
+    append_property_to_project(id,{processing_message => Time.now})
+    return
+    fork do
+      cucumber_results = `cd #{data_dir}#{id};cucumber`
+      puts cucumber_results
+      projects_updated = projects
+      puts cucumber_results.match(/^d+ scenario.*/).inspect
+      projects_updated[id][:scenarios] = cucumber_results.match(/^d+ scenario.*/)[0]
+      projects_updated[id][:steps] = cucumber_results.match(/^d+ step.*/)[0]
+      File.open(data_dir + "projects.yml","w+") do |file|
+        file.puts projects_updated.to_yaml
+      end
+      remove_property_from_project(id,processing_message)
+    end
+  end
+
+  def update(id)
+    pull(id)
+    cucumber(id)
+  end
+
   def project_info(id)
     @id = id
     @data = projects[id]
     erb <<EOF
       <a href='/project/<%=@id%>'><%=@data[:name]%></a>
       <small>
-        <%= @data[:git_uri] %> 
-        <% last_commit = Git.open(data_dir+@id).log.first rescue nil || false%>
-        <% if last_commit %>
-          <%= last_commit.author.name %>
-          <%= last_commit.message %>
-          <%= last_commit.date %>
-          Status: <%= @data[:git_uri]%>
-        <% elsif @data[:error]%>
-          Error: <pre><%= @data[:error].to_yaml %></pre>
-        <% else %>
-          Loading git data...
-        <% end %>
+        <pre><%= @data.to_yaml %></pre>
       </small>
 EOF
   end
@@ -62,29 +135,13 @@ EOF
   end
 
   post '/new_project' do
-    name = params[:name]
-    project_id = name.gsub(/[^a-zA-Z]/,"") + "-" + UUID.generate
-    git_uri = params[:git_uri]
-    new_projects = projects
-    new_projects[project_id] = {:git_uri => git_uri, :name => name}
-    File.open(data_dir + "projects.yml","w+") do |file|
-      file.puts new_projects.to_yaml
-    end
-    fork do
-      begin
-        Git.clone(git_uri, data_dir + project_id)
-      rescue Exception => e
-        new_projects = projects
-        new_projects[project_id][:error] = e
-        File.open(data_dir + "projects.yml","w+") do |file|
-          file.puts new_projects.to_yaml
-        end
-      end
-    end
+    id = clone(params[:name],params[:git_uri])
+    cucumber(id)
   end
 
-  get '/project/:clone_path' do |clone_path|
-    project_info(clone_path)
+  get '/project/:id' do |id|
+    update(id)
+    project_info(id)
   end
 
 end
