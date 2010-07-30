@@ -89,13 +89,13 @@ class Wakawaka < Sinatra::Base
   def cucumber(id)
     processing_message = "Processing cucumber specifications"
     append_property_to_project(id,{processing_message => Time.now})
+    remove_property_from_project(id,:scenarios)
+    remove_property_from_project(id,:steps)
     fork do
       cucumber_results = `cd #{data_dir}#{id};cucumber`
-      puts cucumber_results
-      puts cucumber_results.match(/^d+ scenario.*/).inspect
       append_property_to_project(id, {
-        :scenarios => cucumber_results.match(/^d+ scenario.*/)[0],
-        :steps => cucumber_results.match(/^d+ step.*/)[0]
+        :scenarios => cucumber_results.match(/^\d+ scenario.*/)[0],
+        :steps => cucumber_results.match(/^\d+ step.*/)[0]
       })
       remove_property_from_project(id,processing_message)
     end
@@ -138,6 +138,11 @@ EOF
 
   get '/project/:id' do |id|
     update(id)
+    @id=id
+    erb :project
+  end
+
+  get '/project_info/:id' do |id|
     project_info(id)
   end
 

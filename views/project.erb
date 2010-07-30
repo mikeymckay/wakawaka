@@ -1,0 +1,15 @@
+<div id='project_info'></div>
+
+<script>
+  reload_project_info();
+
+  function reload_project_info() {
+    $('#project_info').load("/project_info/<%=@id%>");
+    if ($('#project_info').html().match(/Processing/)){
+      // Check every second
+      window.setTimeout(function() {
+        reload_project_info();
+      }, 1000);
+    }
+  }
+</script>
