@@ -1,5 +1,5 @@
   <h1>Welcome to Wakawaka<h1>
-  <h2>Available Projects <small>(using <%= File.basename(data_dir) %> )</small></h2>
+  <h2>Available Projects</h2>
   <ul id='project_list'></ul>
   <script>
     $('#project_list').load("/projects")
@@ -15,6 +15,7 @@
     $('#new_project_button').click( function() {
       $('#new_project_form').show();
     });
+
     // Submit the form via ajax
     $('#new_project_form').submit( function() {
       $.post($("#new_project_form").attr('action'), $("#new_project_form").serialize(), function() {
@@ -36,5 +37,4 @@
         }, 1000);
       }
     }
-
   </script>
