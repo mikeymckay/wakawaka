@@ -4,8 +4,6 @@ Feature: Index page
   Scenario: Visit index page
     Given I am on "the home page"
     Then I should see "Welcome to Wakawaka"
-#    And I should see "capybara-demo"
-#    And I should not see "another-capybara-demo"
 
   Scenario: New Project
     Given I am on "the home page"
@@ -16,6 +14,5 @@ Feature: Index page
     Then I should see "another-capybara-demo"
     And I should see "git://github.com/mikeymckay/sinatra-cucumber-capybara-envjs.git"
     And I should see "/var/www/wakawaka"
-    And I should see "Processing git clone"
     And I wait 1 second
     And I should see "Mike McKay"

@@ -1,12 +1,12 @@
 development:
   adapter: sqlite
-  database: db/development.sqlite3
+  database: /var/www/wakawaka/development_data/database.sqlite3
 #  database: db/test.sqlite3
   pool: 5
   timeout: 5000
   
 test:
   adapter: sqlite
-  database: db/test.sqlite3
+  database: /var/www/wakawaka/test_data/database.sqlite3
   pool: 5
   timeout: 5000  
