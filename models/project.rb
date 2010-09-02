@@ -9,7 +9,7 @@ require 'git'
 class Project 
   include Friendly::Document
   attribute :name, String
-  attribute :readable_guid, String
+  attribute :guid, String
   attribute :git_uri, String
   attribute :data_dir, String
   attribute :processing_message, String
@@ -18,19 +18,19 @@ class Project
   attribute :last_commit_date, String
   attribute :scenarios, String
   attribute :steps, String
-  attribute :json, String
   attribute :error, String
   attribute :deleted, Friendly::Boolean, :default => false
+  attribute :cucumber_results, String
 
   indexes :deleted
-  indexes :readable_guid
+  indexes :guid
 
   def self.clone(name, git_uri)
     project = Project.new
     project.name = name
     project.git_uri = git_uri
     project.processing_message = "Processing git clone"
-    project.readable_guid = project.id.to_guid
+    project.guid = project.id.to_guid
     # Creates a human readable unique directory name
     project.data_dir = File.join(File.dirname(Friendly.db.opts[:database]),name.gsub(/([^A-Za-z])/,"")+"_"+project.id.to_guid)
     project.save
@@ -75,9 +75,9 @@ class Project
     self.steps = nil
     self.save
 #    fork do
-      cucumber_results = `cd #{self.data_dir};cucumber`
-      self.scenarios = cucumber_results.match(/^\d+ scenario.*/)[0],
-      self.steps = cucumber_results.match(/^\d+ step.*/)[0]
+      self.cucumber_results = `cd #{self.data_dir};cucumber --format html`
+      self.scenarios = self.cucumber_results.match(/\d+ scenario.*?\)/)[0]
+      self.steps = self.cucumber_results.match(/\d+ step.*?\)/)[0]
       self.processing_message = nil
       self.save
 #    end
@@ -87,6 +87,31 @@ class Project
     self.pull
     self.process_features
   end
+
+  def to_html_table
+    "<table id ='table_#{self.guid}'>" + \
+    self.to_hash.reject{|key,value|
+      #remove unwanted keys
+      [ :cucumber_results,
+        :id,
+        :deleted
+      ].include? key 
+    }.sort{|a,b|
+      a[0].to_s <=> b[0].to_s # sort based on the key
+    }.inject(""){|result, element| 
+      "#{result}
+      <tr>
+        <td>#{ActiveSupport::Inflector.humanize(element[0])}</td>
+        <td> #{element[1]}</td>
+      </tr>
+      "
+    } + "</table>"
+  end
+
+  def url
+    return "/project/#{self.guid}"
+  end
+
 
 end
 

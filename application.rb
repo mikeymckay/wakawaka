@@ -3,7 +3,7 @@ require 'sinatra'
 
 set :public, 'public'
 
-APPLICATION_ROOT = File.expand_path(File.dirname(__FILE__))
+APPLICATION_ROOT = File.expand_path(File.dirname(__FILE__)) + "/"
 
 def yell(msg)
   # Stupid simple logging
@@ -12,28 +12,19 @@ def yell(msg)
   end
 end
 
-def view_project_info(project)
-  @project = project
-  erb <<EOF
-    <a href='/project/<%=@project.readable_guid%>'><%=@project.name%></a>
-    <small>
-      <pre><%= @project.to_yaml.gsub(/.*was.*\n/,"") %></pre>
-    </small>
-EOF
-end
-
 get '/' do
-  puts settings.environment
   erb :home
 end
 
 get '/projects' do
   @projects = Project.all(:deleted => false)
+
   erb <<EOF
     <% @projects.each do |project| %>
-      <li>
-        <%= view_project_info(project) %>
-      </li> 
+        <a href='project/<%= project.guid %>'><%= project.name %></a>
+        <small>
+          <%= project.to_html_table %>
+        </small
     <% end %>
 EOF
 end
@@ -43,12 +34,17 @@ post '/new_project' do
   project.process_features
 end
 
-get '/project/:readable_guid' do |@readable_guid|
-  Project.first(:readable_guid => @readable_guid).update
-  "<a href='/'>Home</a>" + (erb :project)
+get '/project/:guid' do |guid|
+  @project = Project.first(:guid => guid)
+  erb "<a href='/'>Home</a> <%= @project.name%> 
+  <div id='project_<%= @project.guid %>'>Loading...</ul>
+  <script>
+    $.get('<%= @project.url %>/update')
+    $('#project_<%= @project.guid %>').load('<%= @project.url %>/to_html_table')
+  </script>
+  "
 end
 
-get '/project_info/:readable_guid' do |readable_guid|
-  view_project_info(Project.first(:readable_guid => readable_guid))
+get '/project/:guid/:attribute' do |guid,attribute|
+  Project.first(:guid => guid).send(attribute)
 end
-

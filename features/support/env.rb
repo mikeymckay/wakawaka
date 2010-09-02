@@ -8,8 +8,6 @@ require 'spec'
 require 'json'
 require 'friendly'
 
-APPLICATION_ROOT = File.expand_path(File.dirname(__FILE__) + "/../../") + "/"
-
 # Helper method for running shell commands
 def run(command, verbose = false, message = nil)
   if verbose then
@@ -23,27 +21,28 @@ def run(command, verbose = false, message = nil)
   end
 end
 
-# This can be called within features using @reset_test_data
-def reset_test_data
-  # Copy a fresh set of test data from the fixture
-  run "rm -rf #{APPLICATION_ROOT}test_data/*"
-  run "cp -a #{APPLICATION_ROOT}test_data_fixture/* #{APPLICATION_ROOT}test_data", true, "Resetting test database"
-end
-
-reset_test_data
 Friendly.configure(YAML::load_file("config/database.yml")["test"])
 
 require File.join(File.dirname(__FILE__), '..', '..', 'application.rb')
 require File.join(File.dirname(__FILE__), '..', '..', 'models/project.rb')
 
 World do
-  Capybara.app = Wakawaka
+  Capybara.app = Sinatra::Application
   Capybara.default_driver = :envjs
 #  Capybara.javascript_driver = :envjs
   include Capybara
   include Spec::Expectations
   include Spec::Matchers
 end
+
+# This can be called within features using @reset_test_data
+def reset_test_data
+  # Copy a fresh set of test data from the fixture
+  run "rm -rf #{APPLICATION_ROOT}/test_data/*"
+  run "cp -a #{APPLICATION_ROOT}/test_data_fixture/* #{APPLICATION_ROOT}test_data", true, "Resetting test database"
+end
+
+reset_test_data
 
 at_exit do
 end

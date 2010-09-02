@@ -9,6 +9,7 @@ Friendly.configure(YAML::load_file(File.join(File.dirname(__FILE__), "database.y
 set :public, 'public'
 set :views, 'views'
 set :environment, :development
+set :lock, true
 
 require 'application'
 require File.join(File.dirname(__FILE__), '../models/project.rb')

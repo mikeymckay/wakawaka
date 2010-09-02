@@ -22,7 +22,9 @@ describe 'New Project' do
     project.last_commit_author.should == "Mike McKay"
     project.process_features
     project.scenarios.should_not == nil
+    project.scenarios.should == "1 scenario (1 passed)"
     project.steps.should_not == nil
+    project.steps.should == "6 steps (6 passed)"
   end
 
 end
