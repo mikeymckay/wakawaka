@@ -36,15 +36,10 @@ end
 
 get '/project/:guid' do |guid|
   @project = Project.first(:guid => guid)
-  erb "<a href='/'>Home</a> <%= @project.name%> 
-  <div id='project_<%= @project.guid %>'>Loading...</ul>
-  <script>
-    $.get('<%= @project.url %>/update')
-    $('#project_<%= @project.guid %>').load('<%= @project.url %>/to_html_table')
-  </script>
-  "
+  erb :project
 end
 
+# This is fairly dangerous because you could send project/234/destroy
 get '/project/:guid/:attribute' do |guid,attribute|
   Project.first(:guid => guid).send(attribute)
 end

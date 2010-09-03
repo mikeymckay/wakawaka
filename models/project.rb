@@ -112,6 +112,16 @@ class Project
     return "/project/#{self.guid}"
   end
 
+  def github_url
+    "http://" + git_uri.match(/(github.com.*)\.git/)[1] rescue nil
+  end
+
+  # This would be nicer if we used cucumber formatters
+  def cucumber_results_tweaked
+    self.cucumber_results.gsub(/<div id="label">(.*?)<\/div>/){ |match|
+      "<div id=\"label\">#{$1}<a href='#{self.url}'>Back</a><a href='#{self.github_url}'>Edit Scenarios</a><\/div>"
+    }
+  end
 
 end
 
