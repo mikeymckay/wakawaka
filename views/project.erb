@@ -4,7 +4,7 @@
   $.get('<%= @project.url %>/update')
   $('#project_<%= @project.guid %>').load('<%= @project.url %>/to_html_table', function() {
     // Create useful links
-    $("td:contains('cenario'),td:contains('teps')").wrapInner("<a href='<%= @project.url%>/cucumber_results_tweaked'/>")
+    $("td:contains('cenario'),td:contains('teps')").wrapInner("<a href='<%= @project.url %>/features'/>")
     $("td:contains('github.com')").wrapInner("<a href='<%= @project.github_url%>'/>")
   });
 </script>
