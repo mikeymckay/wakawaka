@@ -30,7 +30,7 @@ class Feature
     full_result = `cd #{project_path};cucumber --format html features/#{file_name}`
     html_page = Nokogiri::HTML(full_result)
     html_page.css("div#cucumber-header").unlink
-    html_page.to_html
+    html_page.css("head style").to_html +  html_page.css("div.cucumber").to_html
   end
 
   def to_s

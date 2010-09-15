@@ -48,9 +48,13 @@ post '/project/:guid/feature/:feature' do |guid,feature_name|
   redirect "/project/#{guid}/features"
 end
 
+get '/project/:guid/feature/:feature/result' do |guid,feature_name|
+  Project.first(:guid => guid).feature(feature_name).result
+end
+
 get '/project/:guid/features' do |guid|
   project = Project.first(:guid => guid)
-  project.features.inject("") do |result,feature_name|
+  foo = project.features.inject("") do |result,feature_name|
     feature = project.feature(feature_name)
     result += <<EOF
       <form method='post' action='/project/#{guid}/feature/#{feature.name}'>
@@ -58,11 +62,13 @@ get '/project/:guid/features' do |guid|
         <textarea name='text' id='#{feature.name}' class='feature' style='height:200px;width:700px;' >#{feature.to_s}</textarea>
         <input type='submit' value='Save'/>
       </form>
-      <div>
-        #{feature.result}
-      </div>
+      <div id='#{feature.name}_result'/>
+      <script>
+        $('##{feature.name}_result').load("/project/#{guid}/feature/#{feature.name}/result")
+      </script>
 EOF
   end
+  erb foo
 end
 
 # This is fairly dangerous because you could send project/234/destroy
