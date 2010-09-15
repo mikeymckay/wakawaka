@@ -2,9 +2,51 @@ require 'rubygems'
 require 'json'
 require 'friendly'
 require 'git'
+require 'nokogiri'
 
 # Need this line to be run when using this
 #Friendly.configure(YAML::load_file("config/database.yml")["development"])
+
+class Feature
+  def initialize(path_to_feature_file)
+    raise Exception unless File.exists? path_to_feature_file
+    @file = path_to_feature_file
+  end
+
+  def self.load(path_to_feature_file)
+    self.new(path_to_feature_file)
+  end
+
+  def project_path
+    # two levels above where the feature file is
+    File.dirname(File.dirname(@file))
+  end
+
+  def file_name
+    File.basename(@file)
+  end
+
+  def result
+    full_result = `cd #{project_path};cucumber --format html features/#{file_name}`
+    html_page = Nokogiri::HTML(full_result)
+    html_page.css("div#cucumber-header").unlink
+    html_page.to_html
+  end
+
+  def to_s
+    File.read(@file)
+  end
+
+  def update(text)
+    File.open(@file,"w") do |file|
+      file.puts text
+    end
+  end
+
+  def name
+    self.file_name.gsub(/\.feature/,"")
+  end
+end
 
 class Project 
   include Friendly::Document
@@ -121,6 +163,20 @@ class Project
     self.cucumber_results.gsub(/<div id="label">(.*?)<\/div>/){ |match|
       "<div id=\"label\">#{$1}<a href='#{self.url}'>Back</a><a href='#{self.github_url}'>Edit Scenarios</a><\/div>"
     }
+  end
+
+  def features_dir
+    self.data_dir+"/features/"
+  end
+
+  def features
+    Dir.glob(self.features_dir+"*.feature").map do |file|
+      File.basename file.gsub(/\.feature/,"")
+    end
+  end
+
+  def feature(name)
+    Feature.load(self.features_dir + name + ".feature")
   end
 
 end
