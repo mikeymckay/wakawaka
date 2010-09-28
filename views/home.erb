@@ -6,8 +6,15 @@
   </script>
   <button id='new_project_button'>New Project</button>
   <form target='' id='new_project_form' style='display:none' action="/new_project" method="post">
-    <label for='name'>Project Name</label><input type='text' name='name' id='name'></input>
-    <label for='git_uri'>GitURI</label><input type='text' name='git_uri' id='git_uri'></input>
+    <table>
+      <tr>
+        <td><label for='name'>Project Name</label></td>
+        <td><input type='text' name='name' id='name'></input></td>
+      </tr>
+      <tr>
+        <td><label for='git_uri'>GitURI</label></td><td><input type='text' name='git_uri' id='git_uri'></input></td>
+      </tr>
+    </table>
     <input type='submit' value='Save'>
   </form>
   <script>

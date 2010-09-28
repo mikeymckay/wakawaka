@@ -53,6 +53,8 @@ class Project
   attribute :name, String
   attribute :guid, String
   attribute :git_uri, String
+  attribute :available_branches, String
+  attribute :current_branch, String
   attribute :data_dir, String
   attribute :processing_message, String
   attribute :last_commit_author, String
@@ -79,12 +81,14 @@ class Project
 
 #    fork do
       begin
-        Git.clone(git_uri, project.data_dir)
+        git_project = Git.clone(git_uri, project.data_dir)
+        # branches list should consist of list of local branches only
+        project.available_branches = git_project.branches.map{|branch| branch.name unless branch.remote}.compact.join(", ")
+        project.current_branch = "master"
       rescue Exception => e
         project.error = e
         project.save
       end
-      project.last_commit
       project.processing_message = nil
       project.save
 #    end
@@ -177,6 +181,10 @@ class Project
 
   def feature(name)
     Feature.load(self.features_dir + name + ".feature")
+  end
+
+  def checkout(branch_name = 'master')
+    Git.open(self.data_dir).checkout(branch_name)
   end
 
 end
