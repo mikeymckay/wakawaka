@@ -17,15 +17,24 @@ get '/' do
 end
 
 get '/projects' do
-  @projects = Project.all(:deleted => false)
-
-  erb <<EOF
-    <% @projects.each do |project| %>
-        <a href='project/<%= project.guid %>'><%= project.name %></a>
-        <small>
-          <%= project.to_html_table %>
-        </small
-    <% end %>
+  Project.all(:deleted => false).inject("") do |result,project|
+    result += <<EOF
+    <h3><a href='#{project.url}'>#{project.name}</a></h3>
+    <div class='togglable' id='project_#{project.guid}'/>
+    <script>
+      $.get('#{project.url}/update');
+      $('#project_#{project.guid}').load('#{project.url}?no_template=true');
+    </script>
+EOF
+  end + <<EOF
+    <script>
+      $('.togglable').hide().siblings('h3').prepend('<span>[+]</span><span style="display:none">[-]</span>');
+      //Slide up and down & toogle the Class on click
+      $('.togglable').siblings("h3").click(function(){
+        $(this).children().toggle();
+        $(this).toggleClass('active').next().slideToggle('slow');
+      });
+    </script>
 EOF
 end
 
@@ -35,8 +44,8 @@ post '/new_project' do
 end
 
 get '/project/:guid' do |guid|
-  @project = Project.first(:guid => guid)
-  erb :project
+  use_layout = params[:no_template] ? false : true
+  erb Project.first(:guid => guid).to_html, :layout => use_layout
 end
 
 get '/project/:guid/feature/:feature' do |guid,feature|
@@ -69,6 +78,10 @@ get '/project/:guid/features' do |guid|
 EOF
   end
   erb foo
+end
+
+get '/project/:guid/delete' do |guid|
+  Project.first(:guid => guid).destroy
 end
 
 # This is fairly dangerous because you could send project/234/destroy

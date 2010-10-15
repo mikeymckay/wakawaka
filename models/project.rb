@@ -30,7 +30,7 @@ class Feature
     full_result = `cd #{project_path};cucumber --format html features/#{file_name}`
     html_page = Nokogiri::HTML(full_result)
     html_page.css("div#cucumber-header").unlink
-    html_page.css("head style").to_html.gsub(/absolute/,"block") +  html_page.css("div.cucumber").to_html
+    html_page.css("head style").to_html.gsub(/absolute/,"block").gsub(/body.*?\}/m,"").gsub(/.cucumber, td, th.*?\}/m,"") +  html_page.css("div.cucumber").to_html
   end
 
   def to_s
@@ -89,6 +89,7 @@ class Project
         project.error = e
         project.save
       end
+      project.last_commit
       project.processing_message = nil
       project.save
 #    end
@@ -134,8 +135,12 @@ class Project
     self.process_features
   end
 
-  def to_html_table
-    "<table id ='table_#{self.guid}'>" + \
+  def to_html
+    "
+    <a href='#{url}'>#{name}</a>
+    <a class='delete_project' href='#{url}/delete'>Delete</a>
+
+    <table id ='table_#{guid}'>" + \
     self.to_hash.reject{|key,value|
       #remove unwanted keys
       [ :cucumber_results,
@@ -145,10 +150,19 @@ class Project
     }.sort{|a,b|
       a[0].to_s <=> b[0].to_s # sort based on the key
     }.inject(""){|result, element| 
+      # Create links and reformat elements
+      property = element[0].to_s
+      value = element[1].to_s
+      value = "<a href='#{url}/features'>#{value}</a>" if property.match(/scenario|steps/i)
+      value = "<a href='#{github_url}/features'>#{value}</a>" if property.match(/git_uri/) and github_url
+      if property.match(/available_branches/)
+        value = value.split(",").map{|branch|"<a href='#{url}/checkout/#{branch}'>#{branch}</a>"}.join(", ")
+      end
+
       "#{result}
       <tr>
-        <td>#{ActiveSupport::Inflector.humanize(element[0])}</td>
-        <td> #{element[1]}</td>
+        <td>#{ActiveSupport::Inflector.humanize(property)}</td>
+        <td> #{value}</td>
       </tr>
       "
     } + "</table>"

@@ -21,7 +21,9 @@ def run(command, verbose = false, message = nil)
   end
 end
 
-Friendly.configure(YAML::load_file("config/database.yml")["test"])
+#Friendly.configure(YAML::load_file("config/database.yml")["test"])
+
+Friendly.configure(YAML::load_file(File.join(File.dirname(__FILE__), '..', '..', 'config','database.yml'))["test"])
 
 require File.join(File.dirname(__FILE__), '..', '..', 'application.rb')
 require File.join(File.dirname(__FILE__), '..', '..', 'models/project.rb')
@@ -29,6 +31,7 @@ require File.join(File.dirname(__FILE__), '..', '..', 'models/project.rb')
 World do
   Capybara.app = Sinatra::Application
   Capybara.default_driver = :envjs
+  Capybara.default_selector = :css
 #  Capybara.javascript_driver = :envjs
   include Capybara
   include Spec::Expectations
@@ -39,7 +42,7 @@ end
 def reset_test_data
   # Copy a fresh set of test data from the fixture
   run "rm -rf #{APPLICATION_ROOT}/test_data/*"
-  run "cp -a #{APPLICATION_ROOT}/test_data_fixture/* #{APPLICATION_ROOT}test_data", true, "Resetting test database"
+  run "cp -a #{APPLICATION_ROOT}/test_data_fixtures/* #{APPLICATION_ROOT}test_data", true, "Resetting test database"
 end
 
 reset_test_data

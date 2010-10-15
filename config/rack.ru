@@ -3,12 +3,14 @@ require 'json'
 require 'friendly'
 require 'sinatra'
 
+ENVIRONMENT = "development"
+
 # Configure the database
-Friendly.configure(YAML::load_file(File.join(File.dirname(__FILE__), "database.yml"))["development"])
+Friendly.configure(YAML::load_file(File.join(File.dirname(__FILE__), "database.yml"))[ENVIRONMENT])
 
 set :public, 'public'
 set :views, 'views'
-set :environment, :development
+set :environment, ENVIRONMENT
 #set :lock, true
 
 require 'application'

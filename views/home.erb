@@ -1,6 +1,5 @@
-  <h1>Welcome to Wakawaka<h1>
   <h2>Available Projects</h2>
-  <ul id='project_list'>Loading...</ul>
+  <div id='project_list'>Loading...</div>
   <script>
     $('#project_list').load("/projects")
   </script>
@@ -35,13 +34,8 @@
       return false;
     });
 
-    function reload_project_list() {
-      $('#project_list').load("/projects");
-      if ($('#project_list').html().match(/Processing/)){
-        // Check every second
-        window.setTimeout(function() {
-          reload_project_list();
-        }, 1000);
-      }
-    }
+    //Hide (Collapse) the toggle containers on load
+    //$('.togglable').hide().siblings("h3").prepend("<span>[+]</span><span style='display:none'>[-]</span>");
+
+
   </script>
